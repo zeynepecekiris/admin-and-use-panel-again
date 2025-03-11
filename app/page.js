@@ -19,14 +19,16 @@ export default function App() {
   
   function handleSubmit(event) {
     event.preventDefault();
-    const fullname = `${name} ${surname}`.toLowerCase();
+    // Girilen değerleri küçük harfe çevirip boşlukları temizleyelim
+    const inputName = name.toLowerCase().trim();
+    const inputSurname = surname.toLowerCase().trim();
 
-    if (fullname === "admin admin") {
+    if (inputName === "admin" && inputSurname === "admin") {  // Her bir alanı ayrı kontrol edelim
       setMessage("Welcome to admin panel"); 
       setTimeout(() => {
         router.push("/admin");
       }, 1000);
-    } else if (fullname.trim() !== "") {
+    } else if (inputName && inputSurname) {  // Boş olmayan herhangi bir giriş
       setMessage("Welcome to user panel");
       setTimeout(() => {
         router.push("/user");
