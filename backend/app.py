@@ -6,43 +6,79 @@ import sqlite3
 app = Flask(__name__)
 CORS(app)
 
-users = {
-    "admin": {
-        "password": "admin",
-        "role": "admin",
-        "name": "admin",
-        "surname": "admin",
+def create_users_table():
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS  users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    surname TEXT NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL
+    )""")
+    
+    conn.commit()
+    conn.close()
 
-            },
-        "user": {
-            "password": "user",
-            "role": "user",
-            "name": "user",
-            "surname": "user",
-        }
-           
-    }
-@app.route("/")
-def index():
-    return render_template("index.html")
+create_users_table()
 
+@app.route("/register", methods=["POST"])
+
+def register():
+    data = request.json
+    name = data.get("name", "").lower().strip()
+    surname = data.get("surname", "").lower().strip()
+    password = data.get("password", "").lower().strip()
+    role = data.get("role", "user")
+
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+
+    cursor.execute("SELECT * FROM users WHERE name=? AND surname=? AND password=?", (name, surname, password))
+    existing_user = cursor.fetchone()
+   
+    if existing_user:
+        conn.close()
+        return jsonify({"message": "User already exists"
+    }), 400
+    
+    cursor.execute("INSERT INTO users (name, surname, password, role) VALUES (?, ?, ?, ?)", (name, surname, password, role))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"message": "User registered successfully"
+    }), 201
+   
+    
+   
 @app.route("/login", methods=["POST"])   
 def login():
     data = request.json
     username = data.get("name", "").lower().strip()
-    password = data.get("password", "").lower().strip()
+    surname = data.get("surname", "").lower().strip()
+    password = data.get("password", "").strip()
 
-    if username in users and users[username]["password"] == password:
-        role = users[username]["role"]
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT role FROM users WHERE name=? AND surname=? AND password=?", (name, username, password))
+    user = cursor.fetchone()
+    conn.close()
+
+
+    if user:
         return jsonify({
             "message": "Login successful",
-            "role": role
-            }), 200
-    else:
-        return jsonify({
-            "message": "Invalid credentials"
-        }), 401
-        
+            "role": user[0],
+            "token": "fake_token"
+        }), 200
+    
+
+@app.route("/")
+def home():
+    return "Flask is running!"
     
 
 
