@@ -37,7 +37,7 @@ def register():
     cursor = conn.cursor()
 
 
-    cursor.execute("SELECT * FROM users WHERE name=? AND surname=? AND password=?", (name, surname, password))
+    cursor.execute("SELECT role FROM users WHERE name=? AND surname=? AND password=?", (name, surname, password))
     existing_user = cursor.fetchone()
    
     if existing_user:
@@ -54,27 +54,38 @@ def register():
    
     
    
-@app.route("/login", methods=["POST"])   
+@app.route("/login", methods=["POST"])
 def login():
-    data = request.json
-    username = data.get("name", "").lower().strip()
-    surname = data.get("surname", "").lower().strip()
+    data = request.get_json()  # JSON verisini al
+
+    if not data:
+        return jsonify({"message": "Invalid request, no data received"}), 400
+
+    name = data.get("name", "").strip().lower()
+    surname = data.get("surname", "").strip().lower()
     password = data.get("password", "").strip()
 
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT role FROM users WHERE name=? AND surname=? AND password=?", (name, username, password))
-    user = cursor.fetchone()
-    conn.close()
+    if not name or not surname or not password:
+        return jsonify({"message": "All fields are required"}), 400
 
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT role FROM users WHERE name=? AND surname=? AND password=?", (name, surname, password))
+        user = cursor.fetchone()
+        conn.close()
+    except Exception as e:
+        return jsonify({"message": "Database error", "error": str(e)}), 500
 
     if user:
         return jsonify({
             "message": "Login successful",
             "role": user[0],
-            "token": "fake_token"
+            "token": "fake-jwt-token"
         }), 200
-    
+    else:
+        return jsonify({"message": "Invalid credentials"}), 401
+
 
 @app.route("/")
 def home():
@@ -83,4 +94,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run (host ="0.0.0.0", port=5000, debug=True)
+    app.run (host ="0.0.0.0", port=8000, debug=True)
