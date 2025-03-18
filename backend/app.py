@@ -22,6 +22,7 @@ def create_user_table():
      name TEXT NOT NULL,
      surname TEXT NOT NULL,
      role TEXT NOT NULL
+     login_time TEXT
     )""")
 
     conn.commit()
