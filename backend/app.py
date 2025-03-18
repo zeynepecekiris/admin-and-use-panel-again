@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 
 
+
 app = Flask(__name__)
 CORS(app)
 
@@ -21,7 +22,7 @@ def create_user_table():
      id INTEGER PRIMARY KEY AUTOINCREMENT,
      name TEXT NOT NULL,
      surname TEXT NOT NULL,
-     role TEXT NOT NULL
+     role TEXT NOT NULL,
      login_time TEXT
     )""")
 
@@ -80,30 +81,30 @@ def login():
         cursor.execute("SELECT role FROM users WHERE name=? AND surname=?", (name, surname))
         user = cursor.fetchone()
 
-    if user:
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-         cursor.execute(
+        if user:
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute(
                 "UPDATE users SET login_time=? WHERE name=? AND surname=?",
                 (now, name, surname)
             )
-        conn.commit()
-        role = user[0]
-        conn.close()
+            conn.commit()
+            role = user[0]
+            conn.close()
 
-        return jsonify({
-            "message":"Login successful",
-            "role": role,
-            "token": "fake-jwt-token"
-        }), 200
+            return jsonify({
+                "message":"Login successful",
+                "role": role,
+                "token": "fake-jwt-token"
+            }), 200
 
-    else:
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor.execute(
+        else:
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute(
                 "INSERT INTO users (name, surname, role, login_time) VALUES (?, ?, ?, ?)",
                 (name, surname, "user", now)
             )
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
         
         return jsonify({
                 "message": "User registered and logged in successfully",
