@@ -26,30 +26,36 @@ export default function App() {
 
     console.log("Gönderilen veri:", formData); 
 
-  const response = await fetch("http://localhost:8000/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: formData.name,
-      surname: formData.surname
-     })
-  });
+    try {
+      const response = await fetch("http://localhost:8000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          surname: formData.surname
+        })
+        });
+        console.log("Backend yanıtı (Response status):", response.status);
 
-  const data = await response.json();
+      if (!response.ok){
+        throw new Error("HTTP error! status: ${response.status} ");
+      }
 
-  console.log("Answer the backend:", data); 
+      const data = await response.json();
+      console.log("Answer the backend:", data); 
    
-  if(response.ok){
+ 
     
       if(data.role === "admin"){
         router.push("/admin");
-      }else{
+      } else{
         router.push("/user");
       }
-  } else {
-      setMessage(data.message);
+    } catch (error) {
+      console.error("Hata oluştu:", error);
+      setMessage("Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.");
     }
   }
 
