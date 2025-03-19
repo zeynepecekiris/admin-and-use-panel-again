@@ -18,13 +18,14 @@ def create_user_table():
     cursor = conn.cursor()
 
     cursor.execute("""  
-    CREATE TABLE IF NOT EXISTS users(
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-     name TEXT NOT NULL,
-     surname TEXT NOT NULL,
-     role TEXT NOT NULL,
-     login_time TEXT
-    )""")
+        CREATE TABLE IF NOT EXISTS users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            surname TEXT NOT NULL,
+            role TEXT NOT NULL,
+            login_time TEXT
+        )
+        """)
 
     conn.commit()
     conn.close()

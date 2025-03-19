@@ -17,7 +17,7 @@ export default function App() {
     const {name, value} = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value 
+      [name]: value,
     }));  
   }
 
@@ -40,7 +40,7 @@ export default function App() {
         console.log("Backend yanıtı (Response status):", response.status);
 
       if (!response.ok){
-        throw new Error("HTTP error! status: ${response.status} ");
+        throw new Error(`HTTP error! status: ${response.status}` );
       }
 
       const data = await response.json();
@@ -49,8 +49,12 @@ export default function App() {
  
     
       if(data.role === "admin"){
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
         router.push("/admin");
       } else{
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("token, data.role")
         router.push("/user");
       }
     } catch (error) {
