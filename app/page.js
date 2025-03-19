@@ -17,7 +17,7 @@ export default function App() {
     const {name, value} = event.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value 
+      [name]: value,
     }));  
   }
 
@@ -37,28 +37,39 @@ export default function App() {
           surname: formData.surname
         })
         });
-        console.log("Backend yanıtı (Response status):", response.status);
+   
+      const data = await response.json();
+      console.log("Answer the backend:", data ); 
 
-      if (!response.ok){
-        throw new Error("HTTP error! status: ${response.status} ");
+      if (response.ok) {
+        console.log("🔍 localStorage'a kaydedilecek role:", typeof data.role, data.role);
+        console.log("🔍 localStorage'a kaydedilecek token:", typeof data.token, data.token);
+
+        if (!data.role || !data.token) {
+          console.error(" Beklenen veri eksik! Backend hatalı yanıt döndürüyor.");
+          console.error(" Backend yanıtı:", data);
+          throw new Error("Backend yanlış veri döndürdü!");
+        }
       }
 
-      const data = await response.json();
-      console.log("Answer the backend:", data); 
-   
- 
-    
-      if(data.role === "admin"){
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("token", data.token);
+
+
+      if (data.role === "admin") {
+        console.log("Admin olarak giriş yapıldı, /admin'e yönlendiriliyor...");
         router.push("/admin");
-      } else{
+      } else {
+        console.log("User olarak giriş yapıldı, /user'a yönlendiriliyor...");
         router.push("/user");
       }
-    } catch (error) {
-      console.error("Hata oluştu:", error);
-      setMessage("Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.");
+    } else {
+      alert("Login failed: " + data.message);
     }
+  } catch (error) {
+    console.error(" Hata oluştu!", error);
   }
-
+}
   return (
     <div className={styles.container}>
       <h1 className={styles.header}>Login Panel</h1>
@@ -86,4 +97,4 @@ export default function App() {
       <p className={styles.message}>{message}</p>
     </div>
   );
-}
+
