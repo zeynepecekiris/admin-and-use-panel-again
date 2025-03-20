@@ -83,15 +83,15 @@ def login():
         user = cursor.fetchone()
 
         if user:
+            role = user[0]
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
                 "UPDATE users SET login_time=? WHERE name=? AND surname=?",
                 (now, name, surname)
             )
             conn.commit()
-            role = user[0]
             conn.close()
-
+            print(f"Giriş yapılan kullanıcı: {name} {surname}, Role = {role}, Token = fake-jwt-token")
             return jsonify({
                 "message":"Login successful",
                 "role": role,
@@ -106,6 +106,7 @@ def login():
             )
             conn.commit()
             conn.close()
+        print(f"Yeni kullanıcı oluşturuldu: {name} {surname}, Role = user, Token = fake-jwt-token")
         
         return jsonify({
                 "message": "User registered and logged in successfully",
