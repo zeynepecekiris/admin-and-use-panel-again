@@ -6,10 +6,14 @@ import { useRouter } from "next/navigation";
 export default function Admin() {
     const router = useRouter();
 
-    useEffect(() =>{
+    useEffect(() => {
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
-    })
+    
+        if (!token || role !== "admin") {
+            router.push("/");
+    }
+}, []);
 
     return (
         <div className={styles.container}>

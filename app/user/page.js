@@ -7,27 +7,21 @@ export default function User() {
     const router = useRouter();
     const [isLoaded, setIsLoaded] = useState(false);
 
-    useEffect(() =>{
+    useEffect(() => {
     try {
-
         const token = localStorage.getItem("token");
         const role = localStorage.getItem("role");
 
-        console.log("USER role:", role);
-        console.log("Token:", token);
-
         if (!token) {
-            console.log("Didn't find to token...");
             router.push("/"); 
           } else if (role === "admin") {
             router.push("/admin"); 
-          } else {
-            console.log("User olarak giriş yapıldı, /user'a yönlendiriliyor...");
-            router.push("/user");
+
           }
-        }  catch (error) {
+          
+    } catch (error) {
             console.error("Hata oluştu:", error);
-            console.error("📌 Hata detayları:", error.stack);
+            
           }
         },[]);
 
