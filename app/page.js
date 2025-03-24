@@ -90,7 +90,5 @@ export default function App() {
       <p className={styles.message}>{message}</p>
     </div>
   );
-
-
-
 }
+

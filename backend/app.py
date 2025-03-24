@@ -117,7 +117,27 @@ def login():
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e)}), 500
 
+@app.route("/users", methods = ["GET"])
 
+def get_users():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor =  conn.cursor()
+
+        cursor.execute("SELECT id, name, surname, role, login_time FROM users")
+        users = cursor.fetchall()
+
+        conn.close()
+
+        user_list = [
+            {"id": user[0], "name": user[1], "surname": user[2], "role": user[3], "login_time": user[4]}
+            for user in users
+        ]
+
+        return jsonify(user_list),200
+    
+    except Exception as e:
+        return jsonify({"message": "Database error", "error": str(e)}),500
 
 
 @app.route("/")
