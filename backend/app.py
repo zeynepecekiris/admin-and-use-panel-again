@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  
 DB_PATH = os.path.join(BASE_DIR, "users.db") 
@@ -124,13 +124,13 @@ def get_users():
         conn = sqlite3.connect(DB_PATH)
         cursor =  conn.cursor()
 
-        cursor.execute("SELECT id, name, surname, role, login_time FROM users")
+        cursor.execute("SELECT id, name, surname, role, login_time, message FROM users")
         users = cursor.fetchall()
 
         conn.close()
 
         user_list = [
-            {"id": user[0], "name": user[1], "surname": user[2], "role": user[3], "login_time": user[4]}
+            {"id": user[0], "name": user[1], "surname": user[2], "role": user[3], "login_time": user[4], "message": user[5]}
             for user in users
         ]
 
@@ -138,6 +138,35 @@ def get_users():
     
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e)}),500
+    
+@app.route("/message", methods=["POST","OPTIONS"])
+def update_message():
+    if request.method == "OPTIONS":
+        return "", 200
+    
+    data = request.json
+    name = data.get("name", "").strip().lower()
+    surname = data.get("surname", "").strip().lower()
+    message = data.get("message", "").strip()
+
+    if not name or not surname or not message:
+        return jsonify({"message": "All fields are required"}), 400
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "UPDATE users SET message=? WHERE name=? AND surname=?",
+            (message, name, surname)
+        )
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "Message updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"message": "Data error", "error": str(e)}), 500
 
 
 @app.route("/")

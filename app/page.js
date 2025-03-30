@@ -46,6 +46,8 @@ export default function App() {
           
           localStorage.setItem("role", data.role);
           localStorage.setItem("token", data.token);
+          localStorage.setItem("name", formData.name);
+          localStorage.setItem("surname", formData.surname);
 
           if (data.role === "admin") {
               router.push("/admin");

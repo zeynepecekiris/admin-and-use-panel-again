@@ -38,6 +38,7 @@ export default function Admin() {
                         <th>Surname</th>
                         <th>Role</th>
                         <th>Last Login</th>
+                        <th>Message</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,6 +50,7 @@ export default function Admin() {
                                 <td>{user.surname}</td>
                                 <td>{user.role}</td>
                                 <td>{user.login_time || "Never Logged In"}</td>
+                                <td>{user.message || "No message"}</td>
                             </tr>
                         ))
                     ) : (
