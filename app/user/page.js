@@ -10,21 +10,19 @@ export default function User() {
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
 
-
     useEffect(() => {
     try {
-        const token = localStorage.getItem("token");
-        const role = localStorage.getItem("role");
+        const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY)
+        const role = localStorage.getItem(process.env.NEXT_PUBLIC_ROLE_KEY)
 
         if (!token) {
             router.push("/"); 
         } else if (role === "admin") {
             router.push("/admin"); 
-
         }
 
-        setName(localStorage.getItem("name") || "" );
-        setSurname(localStorage.getItem("surname") || "");
+        setName(localStorage.getItem(process.env.NEXT_PUBLIC_NAME_KEY) || "" );
+        setSurname(localStorage.getItem(process.env.NEXT_PUBLIC_SURNAME_KEY) || "");
 
           
     } catch (error) {
@@ -35,7 +33,7 @@ export default function User() {
 
     const handleSendMessage = async () => {
         try {
-            const response = await fetch("http://localhost:8000/message", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/message`, {
                 method: "POST",
                 headers: {
                      "Content-Type": "application/json"
@@ -61,8 +59,6 @@ export default function User() {
         
     };
 
-
-
     return (
         <div className={styles.container}>
             <h1 className={styles.header}>User Panel</h1>
@@ -80,10 +76,10 @@ export default function User() {
             <button 
                 className={styles.button}
                 onClick={() => {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("role");
-                    localStorage.removeItem("name");
-                    localStorage.removeItem("surname");
+                    localStorage.removeItem(process.env.NEXT_PUBLIC_TOKEN_KEY);
+                    localStorage.removeItem(process.env.NEXT_PUBLIC_ROLE_KEY);
+                    localStorage.removeItem(process.env.NEXT_PUBLIC_NAME_KEY);
+                    localStorage.removeItem(process.env.NEXT_PUBLIC_SURNAME_KEY);
                     router.push("/");
                 }}
             >
