@@ -25,7 +25,7 @@ export default function App() {
     event.preventDefault();
 
     try {
-        const response = await fetch("http://localhost:8000/login", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
@@ -44,10 +44,10 @@ export default function App() {
             throw new Error("Missing role or token");
           }
           
-          localStorage.setItem("role", data.role);
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("name", formData.name);
-          localStorage.setItem("surname", formData.surname);
+          localStorage.setItem(process.env.NEXT_PUBLIC_ROLE_KEY, data.role);
+          localStorage.setItem(process.env.NEXT_PUBLIC_TOKEN_KEY, data.token);
+          localStorage.setItem(process.env.NEXT_PUBLIC_NAME_KEY, formData.name);
+          localStorage.setItem(process.env.NEXT_PUBLIC_SURNAME_KEY, formData.surname);
 
           if (data.role === "admin") {
               router.push("/admin");

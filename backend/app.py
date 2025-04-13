@@ -3,17 +3,22 @@ from flask_cors import CORS
 import sqlite3
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 
 
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  
-DB_PATH = os.path.join(BASE_DIR, "users.db") 
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, os.getenv("DATABASE_URL", "users.db").split("///")[-1])
+FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0")
+FLASK_PORT = int(os.getenv("FLASK_PORT", 8000))
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default-secret-key")
 
 def create_user_table():
-    
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -32,17 +37,14 @@ def create_user_table():
 
 create_user_table()
 
-
-
 @app.route("/register", methods=["POST"])
-
 def register():
     data = request.json
     name = data.get("name", "").lower().strip()
     surname = data.get("surname", "").lower().strip()
     role = data.get("role", "user")
 
-    if not name or not surname :
+    if not name or not surname:
         return jsonify({"message": "All fields are required"}), 400
 
     try:
@@ -55,9 +57,7 @@ def register():
             conn.close()
             return jsonify({"message": "User already exists"}), 400
 
-        
         cursor.execute("INSERT INTO users (name, surname, role) VALUES (?, ?, ?)", (name, surname, role))
-
         conn.commit()
         conn.close()
         
@@ -65,13 +65,12 @@ def register():
    
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e)}), 500
-   
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()  
     name = data.get("name", "").strip().lower()
     surname = data.get("surname", "").strip().lower()
-    
 
     if not name or not surname:
         return jsonify({"message": "All fields are required"}), 400
@@ -106,9 +105,9 @@ def login():
             )
             conn.commit()
             conn.close()
-        print(f"Yeni kullanıcı oluşturuldu: {name} {surname}, Role = user, Token = fake-jwt-token")
+            print(f"Yeni kullanıcı oluşturuldu: {name} {surname}, Role = user, Token = fake-jwt-token")
         
-        return jsonify({
+            return jsonify({
                 "message": "User registered and logged in successfully",
                 "role": "user",
                 "token": "fake-jwt-token"
@@ -117,12 +116,11 @@ def login():
     except Exception as e:
         return jsonify({"message": "Database error", "error": str(e)}), 500
 
-@app.route("/users", methods = ["GET"])
-
+@app.route("/users", methods=["GET"])
 def get_users():
     try:
         conn = sqlite3.connect(DB_PATH)
-        cursor =  conn.cursor()
+        cursor = conn.cursor()
 
         cursor.execute("SELECT id, name, surname, role, login_time, message FROM users")
         users = cursor.fetchall()
@@ -134,10 +132,10 @@ def get_users():
             for user in users
         ]
 
-        return jsonify(user_list),200
+        return jsonify(user_list), 200
     
     except Exception as e:
-        return jsonify({"message": "Database error", "error": str(e)}),500
+        return jsonify({"message": "Database error", "error": str(e)}), 500
     
 @app.route("/message", methods=["POST","OPTIONS"])
 def update_message():
@@ -168,12 +166,9 @@ def update_message():
     except Exception as e:
         return jsonify({"message": "Data error", "error": str(e)}), 500
 
-
 @app.route("/")
 def home():
     return "Flask is running!"
-    
-
 
 if __name__ == "__main__":
-    app.run (host ="0.0.0.0", port=8000, debug=True)
+    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=os.getenv("FLASK_DEBUG", "1") == "1")
